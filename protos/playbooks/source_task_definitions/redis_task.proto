@@ -1,0 +1,41 @@
+syntax = "proto3";
+package protos.playbooks;
+
+import "google/protobuf/wrappers.proto";
+
+
+message Redis {
+  // Fetch server statistics via the Redis INFO command.
+  message GetInfo {
+    // Optional INFO section (e.g. "memory", "clients", "stats", "replication").
+    // When empty, the default INFO output is returned.
+    google.protobuf.StringValue section = 1;
+  }
+
+  // Fetch the Redis slow query log via SLOWLOG GET.
+  message GetSlowlog {
+    // Number of entries to return. Defaults to 10 when unset.
+    google.protobuf.UInt64Value limit = 1;
+  }
+
+  // Run a single read-only Redis command (e.g. "DBSIZE", "GET foo",
+  // "MEMORY USAGE key", "CLIENT LIST"). Write/administrative commands are
+  // rejected by the connector.
+  message RunCommand {
+    google.protobuf.StringValue command = 1;
+  }
+
+  enum TaskType {
+    UNKNOWN = 0;
+    GET_INFO = 1;
+    GET_SLOWLOG = 2;
+    RUN_COMMAND = 3;
+  }
+
+  TaskType type = 1;
+  oneof task {
+    GetInfo get_info = 2;
+    GetSlowlog get_slowlog = 3;
+    RunCommand run_command = 4;
+  }
+}

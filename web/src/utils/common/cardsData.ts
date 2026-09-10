@@ -87,6 +87,11 @@ export const cardsData = [
     docs: "https://docs.drdroid.io/docs/postgresql-database",
   },
   {
+    url: "/integrations/redis_logo.svg",
+    enum: "REDIS",
+    desc: "Fetch Redis INFO stats, slow query log and run read-only commands",
+  },
+  {
     url: "/integrations/opsgenie-logo.png",
     enum: "OPS_GENIE",
     desc: "Authorise Doctor Droid to read incidents from OpsGenie",

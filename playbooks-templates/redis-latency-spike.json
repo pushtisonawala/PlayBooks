@@ -1,0 +1,30 @@
+{
+    "name": "Redis Latency Spike Investigation",
+    "description": "Playbook to investigate a spike in Redis command latency using the Redis connector (INFO stats, slow query log) alongside client and upstream traffic checks.",
+    "steps": [
+        {
+            "description": "Pull the slow query log",
+            "notes": "Run the Redis connector task **Fetch Redis slow query log** with a limit of 50. Look for a recurring command pattern, large key names, or `KEYS` / `SMEMBERS` / `HGETALL` on big collections. Note the slowest commands and their duration in microseconds."
+        },
+        {
+            "description": "Check server-side latency stats",
+            "notes": "Run **Run a read-only Redis command** with `LATENCY LATEST` and `LATENCY HISTORY command`. Also run `INFO commandstats` to see per-command call counts and `usec_per_call`. A high `usec_per_call` on a frequent command points to an expensive access pattern."
+        },
+        {
+            "description": "Check for blocking and fork pauses",
+            "notes": "Run **Fetch Redis INFO stats** for the `stats` section. Review `latest_fork_usec` (RDB/AOF fork pauses), `blocked_clients`, and `total_reads_processed` vs `instantaneous_ops_per_sec`. A large `latest_fork_usec` means persistence forks are stalling the event loop."
+        },
+        {
+            "description": "Check memory pressure and eviction",
+            "notes": "Run **Fetch Redis INFO stats** for the `memory` section. A `mem_fragmentation_ratio` well above 1.5, `used_memory` near `maxmemory`, or rising `evicted_keys` (from the `stats` section) all add latency. Cross-check with the Redis Memory & Eviction Pressure playbook."
+        },
+        {
+            "description": "Check client and connection load",
+            "notes": "Run **Fetch Redis INFO stats** for the `clients` section. Compare `connected_clients` against `maxclients` from `INFO`. Run `CLIENT LIST` via **Run a read-only Redis command** to spot a client with a large `omem` (output buffer) or many `cmd=subscribe` connections."
+        },
+        {
+            "description": "Correlate with upstream traffic",
+            "notes": "Select the services that call this Redis instance and check their request rate and error rate over the same window. A latency spike that starts with a traffic increase usually means an expensive query pattern is now being run more often."
+        }
+    ]
+}

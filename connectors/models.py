@@ -50,6 +50,7 @@ integrations_connector_type_display_name_map = {
     Source.BIG_QUERY: 'BIG QUERY',
     Source.JIRA_CLOUD: 'JIRA',
     Source.ARGOCD: 'ARGOCD',
+    Source.REDIS: 'REDIS',
 }
 
 integrations_connector_type_category_map = {
@@ -83,6 +84,7 @@ integrations_connector_type_category_map = {
     Source.POSTGRES: 'Database',
     Source.SQL_DATABASE_CONNECTION: 'Database',
     Source.BIG_QUERY: 'Database',
+    Source.REDIS: 'Database',
     Source.OPEN_AI: 'LLM Tools',
     Source.BASH: 'Remote Server',
     Source.KUBERNETES: 'Cloud',
@@ -343,6 +345,18 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.ARGOCD_TOKEN,
         ]
     ],
+    Source.REDIS: [
+        # Only host is required; port/password/db/ssl are optional. Each accepted
+        # combination is listed because connector validation is an exact set match.
+        [SourceKeyType.REDIS_HOST],
+        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT],
+        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_DB],
+        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD],
+        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD,
+         SourceKeyType.REDIS_DB],
+        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD,
+         SourceKeyType.REDIS_DB, SourceKeyType.REDIS_SSL_ENABLED],
+    ],
 }
 
 integrations_connector_key_display_name_map = {
@@ -426,6 +440,11 @@ integrations_connector_key_display_name_map = {
     SourceKeyType.JIRA_DOMAIN: 'Domain',
     SourceKeyType.ARGOCD_SERVER: 'ArgoCD Server',
     SourceKeyType.ARGOCD_TOKEN: 'Token',
+    SourceKeyType.REDIS_HOST: 'Host',
+    SourceKeyType.REDIS_PORT: 'Port',
+    SourceKeyType.REDIS_PASSWORD: 'Password',
+    SourceKeyType.REDIS_DB: 'DB Number',
+    SourceKeyType.REDIS_SSL_ENABLED: 'SSL Enabled',
 }
 
 
@@ -574,7 +593,8 @@ class ConnectorKey(models.Model):
                              SourceKeyType.JIRA_EMAIL,
                              SourceKeyType.JIRA_DOMAIN,
                              SourceKeyType.ARGOCD_SERVER,
-                             SourceKeyType.ARGOCD_TOKEN]:
+                             SourceKeyType.ARGOCD_TOKEN,
+                             SourceKeyType.REDIS_PASSWORD]:
             key_value = '*********' + self.key[-4:]
         return ConnectorKeyProto(key_type=self.key_type,
                                  key=StringValue(value=key_value),

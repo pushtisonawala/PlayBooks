@@ -19,6 +19,7 @@ import "protos/playbooks/source_task_definitions/eks_task.proto";
 import "protos/playbooks/source_task_definitions/sql_data_fetch_task.proto";
 import "protos/playbooks/source_task_definitions/api_task.proto";
 import "protos/playbooks/source_task_definitions/bash_task.proto";
+import "protos/playbooks/source_task_definitions/redis_task.proto";
 import "protos/playbooks/source_task_definitions/documentation_task.proto";
 import "protos/playbooks/source_task_definitions/promql_task.proto";
 import "protos/playbooks/source_task_definitions/azure_task.proto";
@@ -88,6 +89,7 @@ message PlaybookTask {
     BigQuery big_query = 121;
     Jira jira_cloud = 122;
     ArgoCD argocd = 123;
+    Redis redis = 124;
   }
 }
 

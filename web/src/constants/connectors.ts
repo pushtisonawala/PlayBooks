@@ -25,4 +25,5 @@ export const connectors = {
   SMTP: "SMTP",
   ROOTLY: "ROOTLY",
   ZENDUTY: "ZENDUTY",
+  REDIS: "REDIS",
 };

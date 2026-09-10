@@ -178,6 +178,7 @@ enum Source {
   JENKINS = 62;
   GITHUB_ACTIONS = 63;
   ARGOCD = 65;
+  REDIS = 66;
 }
 
 enum SourceKeyType {
@@ -329,6 +330,12 @@ enum SourceKeyType {
 
   ARGOCD_SERVER = 106;
   ARGOCD_TOKEN = 107;
+
+  REDIS_HOST = 111;
+  REDIS_PORT = 112;
+  REDIS_PASSWORD = 113;
+  REDIS_DB = 114;
+  REDIS_SSL_ENABLED = 115;
 }
 
 enum SourceModelType {
@@ -441,4 +448,7 @@ enum SourceModelType {
 
   // ArgoCD Models
   ARGOCD_APPS = 2801;
+
+  // Redis Models
+  REDIS_CONNECTION = 2901;
 }

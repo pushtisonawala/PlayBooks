@@ -139,6 +139,18 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['database'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.POSTGRES_PORT:
                 credentials_dict['port'] = conn_key.key.value
+    elif connector_type == Source.REDIS:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.REDIS_HOST:
+                credentials_dict['host'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.REDIS_PORT:
+                credentials_dict['port'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.REDIS_PASSWORD:
+                credentials_dict['password'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.REDIS_DB:
+                credentials_dict['db'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.REDIS_SSL_ENABLED:
+                credentials_dict['ssl_enabled'] = conn_key.key.value
     elif connector_type == Source.SQL_DATABASE_CONNECTION:
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.SQL_DATABASE_CONNECTION_STRING_URI:

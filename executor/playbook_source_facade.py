@@ -28,6 +28,7 @@ from executor.playbook_source_manager import PlaybookSourceManager
 from executor.source_managers.datadog_source_manager import DatadogSourceManager
 from executor.source_managers.eks_source_manager import EksSourceManager
 from executor.source_managers.postgres_source_manager import PostgresSourceManager
+from executor.source_managers.redis_source_manager import RedisSourceManager
 from executor.source_managers.zenduty_source_manager import ZendutySourceManager
 from executor.source_managers.sql_database_connection_source_manager import SqlDatabaseConnectionSourceManager
 from executor.source_managers.rootly_source_manager import RootlySourceManager
@@ -134,6 +135,7 @@ playbook_source_facade.register(Source.GCM, GcmSourceManager())
 playbook_source_facade.register(Source.GRAFANA_LOKI, GrafanaLokiSourceManager())
 
 playbook_source_facade.register(Source.POSTGRES, PostgresSourceManager())
+playbook_source_facade.register(Source.REDIS, RedisSourceManager())
 playbook_source_facade.register(Source.CLICKHOUSE, ClickhouseSourceManager())
 playbook_source_facade.register(Source.SQL_DATABASE_CONNECTION, SqlDatabaseConnectionSourceManager())
 playbook_source_facade.register(Source.ELASTIC_SEARCH, ElasticSearchSourceManager())

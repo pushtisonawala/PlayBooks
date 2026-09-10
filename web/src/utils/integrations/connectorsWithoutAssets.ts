@@ -11,4 +11,5 @@ export const connectorsWithoutAssets = [
   connectors.SMTP,
   connectors.ROOTLY,
   connectors.ZENDUTY,
+  connectors.REDIS,
 ];

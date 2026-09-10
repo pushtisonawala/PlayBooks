@@ -221,6 +221,7 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     JENKINS: _Source.ValueType  # 62
     GITHUB_ACTIONS: _Source.ValueType  # 63
     ARGOCD: _Source.ValueType  # 65
+    REDIS: _Source.ValueType  # 66
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -289,6 +290,7 @@ LINEAR: Source.ValueType  # 61
 JENKINS: Source.ValueType  # 62
 GITHUB_ACTIONS: Source.ValueType  # 63
 ARGOCD: Source.ValueType  # 65
+REDIS: Source.ValueType  # 66
 global___Source = Source
 
 class _SourceKeyType:
@@ -404,6 +406,11 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     JIRA_DOMAIN: _SourceKeyType.ValueType  # 109
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
     ARGOCD_TOKEN: _SourceKeyType.ValueType  # 107
+    REDIS_HOST: _SourceKeyType.ValueType  # 111
+    REDIS_PORT: _SourceKeyType.ValueType  # 112
+    REDIS_PASSWORD: _SourceKeyType.ValueType  # 113
+    REDIS_DB: _SourceKeyType.ValueType  # 114
+    REDIS_SSL_ENABLED: _SourceKeyType.ValueType  # 115
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -514,6 +521,11 @@ JIRA_EMAIL: SourceKeyType.ValueType  # 110
 JIRA_DOMAIN: SourceKeyType.ValueType  # 109
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
 ARGOCD_TOKEN: SourceKeyType.ValueType  # 107
+REDIS_HOST: SourceKeyType.ValueType  # 111
+REDIS_PORT: SourceKeyType.ValueType  # 112
+REDIS_PASSWORD: SourceKeyType.ValueType  # 113
+REDIS_DB: SourceKeyType.ValueType  # 114
+REDIS_SSL_ENABLED: SourceKeyType.ValueType  # 115
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:
@@ -605,6 +617,8 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     JIRA_USER: _SourceModelType.ValueType  # 2702
     ARGOCD_APPS: _SourceModelType.ValueType  # 2801
     """ArgoCD Models"""
+    REDIS_CONNECTION: _SourceModelType.ValueType  # 2901
+    """Redis Models"""
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -691,6 +705,8 @@ JIRA_PROJECT: SourceModelType.ValueType  # 2701
 JIRA_USER: SourceModelType.ValueType  # 2702
 ARGOCD_APPS: SourceModelType.ValueType  # 2801
 """ArgoCD Models"""
+REDIS_CONNECTION: SourceModelType.ValueType  # 2901
+"""Redis Models"""
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final

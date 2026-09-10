@@ -1,0 +1,30 @@
+{
+    "name": "Redis Memory & Eviction Pressure Investigation",
+    "description": "Playbook to investigate high Redis memory usage, key eviction, or OOM errors by querying the instance directly with the Redis connector.",
+    "steps": [
+        {
+            "description": "Snapshot current memory",
+            "notes": "Run the Redis connector task **Fetch Redis INFO stats** for the `memory` section. Record `used_memory_human`, `used_memory_rss_human`, `used_memory_peak_human`, `maxmemory_human`, `maxmemory_policy`, and `mem_fragmentation_ratio`. If `used_memory` is close to `maxmemory`, the instance is at capacity."
+        },
+        {
+            "description": "Check eviction and keyspace churn",
+            "notes": "Run **Fetch Redis INFO stats** for the `stats` section. Rising `evicted_keys` and `expired_keys`, and a low `keyspace_hits` / (`keyspace_hits` + `keyspace_misses`) ratio, mean useful data is being pushed out. Note the rate of change against the alert window."
+        },
+        {
+            "description": "Find what is consuming memory",
+            "notes": "Run **Run a read-only Redis command** with `MEMORY STATS` for a breakdown, and `INFO keyspace` to see key counts per DB. Use `SCAN` with `COUNT 100` plus `MEMORY USAGE <key>` on a sample of large keys to identify oversized values or collections."
+        },
+        {
+            "description": "Check fragmentation and allocator",
+            "notes": "A `mem_fragmentation_ratio` above ~1.5 wastes RSS; below 1.0 means Redis is swapping. Run **Run a read-only Redis command** with `MEMORY DOCTOR` for Redis's own assessment."
+        },
+        {
+            "description": "Review the eviction policy fit",
+            "notes": "If `maxmemory_policy` is `noeviction`, writes will fail with OOM once full — confirm that is intended. For a cache, `allkeys-lru` or `allkeys-lfu` is usually correct. Flag a mismatch to the owning team."
+        },
+        {
+            "description": "Correlate with upstream writes",
+            "notes": "Select the services writing to this instance and check for a deploy or traffic change at the start of the memory climb. A steady climb with flat traffic suggests missing TTLs or a key leak rather than load."
+        }
+    ]
+}
