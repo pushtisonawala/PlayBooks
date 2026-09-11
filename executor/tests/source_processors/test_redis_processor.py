@@ -108,3 +108,110 @@ class TestRedisProcessor(TestCase):
             mock_redis.return_value = mock_client
             result = RedisProcessor(host='localhost').run_command('CONFIG GET maxmemory')
             self.assertEqual(result, ['maxmemory', '0'])
+
+    def test_run_command_config_get_filters_password(self):
+        # CONFIG GET requirepass must never surface the password, even though
+        # GET is the allowed sub-command - the result is filtered, not the request.
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = ['requirepass', 'super-secret']
+            mock_redis.return_value = mock_client
+            result = RedisProcessor(host='localhost').run_command('CONFIG GET requirepass')
+            self.assertEqual(result, [])
+
+    def test_run_command_config_get_wildcard_filters_password_only(self):
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = [
+                'maxmemory', '0', 'requirepass', 'super-secret', 'masterauth', 'also-secret',
+            ]
+            mock_redis.return_value = mock_client
+            result = RedisProcessor(host='localhost').run_command('CONFIG GET *')
+            self.assertEqual(result, ['maxmemory', '0'])
+
+    def test_run_command_config_get_filters_dict_shape(self):
+        # Some redis-py versions/paths return CONFIG GET as a dict rather than
+        # a flat list - filtering must handle both.
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = {'requirepass': 'secret', 'maxmemory': '0'}
+            mock_redis.return_value = mock_client
+            result = RedisProcessor(host='localhost').run_command('CONFIG GET *')
+            self.assertEqual(result, {'maxmemory': '0'})
+
+    def test_run_command_blocks_debug(self):
+        # DEBUG POPULATE/RELOAD/RESTART are destructive/disruptive; DEBUG is
+        # not allow-listed at all rather than trying to enumerate every
+        # dangerous sub-command.
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('DEBUG POPULATE 1000')
+
+    def test_run_command_blocks_wait(self):
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('WAIT 1 0')
+
+    def test_run_command_blocks_client_reply(self):
+        # CLIENT REPLY OFF would also wedge the cached connection for every
+        # later command on this processor instance.
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('CLIENT REPLY OFF')
+
+    def test_run_command_blocks_client_kill(self):
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('CLIENT KILL ID 1')
+
+    def test_run_command_allows_client_list(self):
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = 'id=1 addr=127.0.0.1:0'
+            mock_redis.return_value = mock_client
+            result = RedisProcessor(host='localhost').run_command('CLIENT LIST')
+            self.assertEqual(result, 'id=1 addr=127.0.0.1:0')
+
+    def test_run_command_blocks_memory_purge(self):
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('MEMORY PURGE')
+
+    def test_run_command_allows_memory_usage(self):
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = 56
+            mock_redis.return_value = mock_client
+            result = RedisProcessor(host='localhost').run_command('MEMORY USAGE mykey')
+            self.assertEqual(result, 56)
+
+    def test_run_command_blocks_slowlog_reset(self):
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('SLOWLOG RESET')
+
+    def test_run_command_allows_bare_command(self):
+        # Bare COMMAND (no sub-command) lists the command table - read-only.
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = []
+            mock_redis.return_value = mock_client
+            RedisProcessor(host='localhost').run_command('COMMAND')
+            mock_client.execute_command.assert_called_once_with('COMMAND')
+
+    def test_run_command_blocks_command_getkeysandflags(self):
+        with self.assertRaises(RedisCommandNotAllowed):
+            RedisProcessor(host='localhost').run_command('COMMAND GETKEYSANDFLAGS SET foo bar')
+
+    def test_run_command_handles_quoted_argument(self):
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.return_value = 'bar'
+            mock_redis.return_value = mock_client
+            RedisProcessor(host='localhost').run_command('GET "my key"')
+            mock_client.execute_command.assert_called_once_with('GET', 'my key')
+
+    def test_run_command_resets_client_on_failure(self):
+        # A broken/blocked connection must not be reused by the next call.
+        with mock.patch('redis.Redis') as mock_redis:
+            mock_client = mock.Mock()
+            mock_client.execute_command.side_effect = TimeoutError("timed out")
+            mock_redis.return_value = mock_client
+            processor = RedisProcessor(host='localhost')
+            with self.assertRaises(TimeoutError):
+                processor.run_command('DBSIZE')
+            self.assertIsNone(processor.client)

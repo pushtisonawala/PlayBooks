@@ -346,16 +346,18 @@ integrations_connector_type_connector_keys_map = {
         ]
     ],
     Source.REDIS: [
-        # Only host is required; port/password/db/ssl are optional. Each accepted
-        # combination is listed because connector validation is an exact set match.
-        [SourceKeyType.REDIS_HOST],
-        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT],
-        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_DB],
-        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD],
-        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD,
-         SourceKeyType.REDIS_DB],
-        [SourceKeyType.REDIS_HOST, SourceKeyType.REDIS_PORT, SourceKeyType.REDIS_PASSWORD,
-         SourceKeyType.REDIS_DB, SourceKeyType.REDIS_SSL_ENABLED],
+        # A single full-key set, same as Postgres/Clickhouse. The UI always
+        # submits all five keys (empty string for the ones left blank), and
+        # RedisProcessor.__init__ already treats blank port/password/db/ssl
+        # as "use the default" - so this covers the common case without the
+        # combinatorial subset list validation would otherwise need.
+        [
+            SourceKeyType.REDIS_HOST,
+            SourceKeyType.REDIS_PORT,
+            SourceKeyType.REDIS_PASSWORD,
+            SourceKeyType.REDIS_DB,
+            SourceKeyType.REDIS_SSL_ENABLED,
+        ]
     ],
 }
 
